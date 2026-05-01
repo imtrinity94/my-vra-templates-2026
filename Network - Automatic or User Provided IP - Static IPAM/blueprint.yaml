@@ -1,1 +1,24 @@
-
+formatVersion: 1
+inputs:
+  # VLAN:
+  #   type: string
+  ipAddress:
+    type: string
+    default: Automatic
+    pattern: ^((Automatic)$|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$
+resources:
+  VM:
+    type: Cloud.vSphere.Machine
+    properties:
+      image: RHEL9
+      flavor: small
+      networks:
+        - network: ${resource.Network1.id}
+          assignment: static
+          address: ${input.ipAddress != 'Automatic' ? input.ipAddress:""}
+  Network1:
+    type: Cloud.vSphere.Network
+    properties:
+      networkType: existing
+      # constraints:
+      #   - tag: vra.network.vlan:${input.VLAN}
