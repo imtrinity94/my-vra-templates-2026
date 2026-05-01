@@ -1,1 +1,94 @@
-
+formatVersion: 1
+inputs:
+  # Network Selection
+  Nic1_Network_Tag:
+    type: string
+    title: NIC 1 Network Tag
+    oneOf:
+      - title: mayank-PG
+        const: net:mayank-PG
+      - title: VM Network
+        const: net:VM Network
+  Nic2_Network_Tag:
+    type: string
+    title: NIC 2 Network Tag
+    oneOf:
+      - title: VM Network
+        const: net:VM Network
+      - title: mayank-PG
+        const: net:mayank-PG
+  # NIC 1 Inputs
+  VmIp_1:
+    type: string
+    title: NIC 1 IP Address
+    default: 172.10.20.75
+  VmNetmask_1:
+    type: string
+    title: NIC 1 Netmask
+    default: 255.255.255.0
+  VmGateway_1:
+    type: string
+    title: NIC 1 Gateway
+    default: 172.10.20.1
+  # NIC 2 Inputs
+  VmIp_2:
+    type: string
+    title: NIC 2 IP Address
+    default: 172.10.20.84
+  VmNetmask_2:
+    type: string
+    title: NIC 2 Netmask
+    default: 255.255.255.0
+  VmGateway_2:
+    type: string
+    title: NIC 2 Gateway
+    default: 172.10.20.1
+  # DNS and Domain Inputs
+  VmDns:
+    type: string
+    title: DNS Server
+    default: 172.10.20.2
+  VmDomain:
+    type: string
+    title: Domain Name
+    default: vcf.lab
+  VmSearchDomain:
+    type: string
+    title: DNS Search Domain
+    default: vcf.lab
+resources:
+  VM:
+    type: Cloud.Machine
+    properties:
+      image: RHEL9
+      flavor: small
+      customNetworkConfigure: 'yes'
+      networks:
+        - network: ${resource.vSphere_Network_1.id}
+          assignment: static
+        - network: ${resource.vSphere_Network_2.id}
+          assignment: static
+      # Input Mappings
+      Nic1_Ip: ${input.VmIp_1}
+      Nic1_Netmask: ${input.VmNetmask_1}
+      Nic1_Gateway: ${input.VmGateway_1}
+      Nic2_Ip: ${input.VmIp_2}
+      Nic2_Netmask: ${input.VmNetmask_2}
+      Nic2_Gateway: ${input.VmGateway_2}
+      VmDns:
+        - ${input.VmDns}
+      VmDomain: ${input.VmDomain}
+      VmSearchDomain:
+        - ${input.VmSearchDomain}
+  vSphere_Network_1:
+    type: Cloud.vSphere.Network
+    properties:
+      networkType: existing
+      constraints:
+        - tag: ${input.Nic1_Network_Tag}
+  vSphere_Network_2:
+    type: Cloud.vSphere.Network
+    properties:
+      networkType: existing
+      constraints:
+        - tag: ${input.Nic2_Network_Tag}
