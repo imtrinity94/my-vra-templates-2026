@@ -1,0 +1,35 @@
+formatVersion: 1
+inputs:
+  addNIC2:
+    type: boolean
+    title: Add Optional Second NIC to VM
+    default: true
+  network2:
+    type: string
+    title: Network 2
+    default: net:mayank-PG
+    format: ''
+    oneOf:
+      - title: VM Network
+        const: net:VM Network
+      - title: mayank-PG
+        const: net:mayank-PG
+resources:
+  VM:
+    type: Cloud.vSphere.Machine
+    properties:
+      image: RHEL9
+      flavor: small
+      networks: ${map_by(resource.Cloud_vSphere_Network_1[*].* + resource.Cloud_vSphere_Network_2[*].*, r => {"network":r.id, "assignment":"dynamic", "deviceIndex":r.deviceIndex})}
+      # networks: ${map_to_object(resource.Cloud_vSphere_Network_1[*].id + resource.Cloud_vSphere_Network_2[*].id, "network")}
+  Cloud_vSphere_Network_1:
+    type: Cloud.vSphere.Network
+    properties:
+      networkType: existing
+  Cloud_vSphere_Network_2:
+    type: Cloud.vSphere.Network
+    properties:
+      count: '${input.addNIC2 ? 1 : 0}'
+      networkType: existing
+      constraints:
+        - tag: ${input.network2}
